@@ -1,0 +1,270 @@
+# Category Products Module - Documentación para LLM
+
+## RESUMEN EJECUTIVO
+Módulo de PrestaShop que proporciona una API AJAX para obtener dinámicamente información de categorías y productos sin recargar la página. Facilita la navegación fluida y mejora la experiencia del usuario.
+
+## ARQUITECTURA DEL MÓDULO
+
+### Estructura de Archivos
+```
+categoryproducts/
+├── categoryproducts.php              # Clase principal del módulo
+├── controllers/front/ajax.php        # Controlador API AJAX
+├── README.md                         # Documentación detallada
+└── llm.txt                          # Este archivo
+```
+
+### Clase Principal (categoryproducts.php)
+- **Hereda de:** Module (PrestaShop)
+- **Hook registrado:** actionFrontControllerSetMedia
+- **Función:** Registra la URL del controlador AJAX como variable JavaScript global
+- **Variable JS creada:** categoryproducts_ajax_url
+- **Página de configuración:** Método getContent() que muestra información, documentación y configuración SEO
+- **Verificación automática:** Método checkRobotsTxt() que comprueba la configuración SEO
+
+### Página de Configuración
+El módulo incluye una página de configuración accesible desde el panel de administración que proporciona:
+- Información general del módulo
+- Enlaces directos a README.md y llm.txt
+- **Verificación automática de robots.txt con indicadores visuales**
+- Instrucciones para configurar robots.txt
+- Ejemplos de uso en JavaScript
+- Estado del módulo
+
+### Verificación de robots.txt
+La página de configuración incluye una verificación automática que:
+- **Verde (Éxito):** robots.txt existe y contiene la línea Disallow
+- **Amarillo (Advertencia):** robots.txt existe pero falta la línea Disallow
+- **Rojo (Error):** robots.txt no existe en la raíz del sitio
+
+## API ENDPOINTS Y FUNCIONALIDADES
+
+### Endpoint Base
+URL: {domain}/modules/categoryproducts/controllers/front/ajax.php
+Variable JS: categoryproducts_ajax_url
+
+### 1. OBTENER SUBCATEGORÍAS
+**Acción:** get_categories
+**Parámetros:**
+- action: 'get_categories'
+- id_category: ID numérico de la categoría padre
+
+**Respuesta JSON:**
+```json
+{
+    "success": true,
+    "subcategories": [
+        {
+            "id_category": "456",
+            "name": "Nombre de Subcategoría",
+            "url": "URL completa SEO-friendly"
+        }
+    ]
+}
+```
+
+### 2. OBTENER PRODUCTOS DE CATEGORÍA
+**Acción:** Por defecto (sin especificar action)
+**Parámetros:**
+- id_category: ID numérico de la categoría
+
+**Respuesta JSON:**
+```json
+{
+    "success": true,
+    "products": [
+        {
+            "id": "789",
+            "name": "Nombre del Producto",
+            "url": "URL completa SEO-friendly del producto"
+        }
+    ]
+}
+```
+
+**Límites:**
+- Máximo 100 productos por consulta
+- Ordenamiento: Por posición (ASC)
+
+### 3. BÚSQUEDA EN DESCRIPCIONES
+**Acción:** search_description
+**Parámetros:**
+- action: 'search_description'
+- search_term: Término a buscar en descripciones de categorías
+
+**Respuesta JSON:**
+```json
+{
+    "success": true,
+    "categories": [
+        {
+            "id": "456",
+            "name": "Nombre de Categoría",
+            "url": "URL completa SEO-friendly"
+        }
+    ],
+    "total_found": 1
+}
+```
+
+## MANEJO DE ERRORES
+
+Todas las respuestas incluyen el campo "success" (boolean).
+En caso de error:
+```json
+{
+    "success": false,
+    "message": "Descripción del error"
+}
+```
+
+**Errores comunes:**
+- Invalid category ID
+- Category not found
+- Search term is required
+
+## EJEMPLO DE IMPLEMENTACIÓN JAVASCRIPT
+
+```javascript
+// Obtener subcategorías
+async function getSubcategories(categoryId) {
+    const response = await fetch(categoryproducts_ajax_url, {
+        method: 'POST',
+        body: new URLSearchParams({
+            action: 'get_categories',
+            id_category: categoryId
+        })
+    });
+    return await response.json();
+}
+
+// Obtener productos
+async function getProducts(categoryId) {
+    const response = await fetch(categoryproducts_ajax_url, {
+        method: 'POST',
+        body: new URLSearchParams({
+            id_category: categoryId
+        })
+    });
+    return await response.json();
+}
+
+// Buscar en descripciones
+async function searchDescriptions(searchTerm) {
+    const response = await fetch(categoryproducts_ajax_url, {
+        method: 'POST',
+        body: new URLSearchParams({
+            action: 'search_description',
+            search_term: searchTerm
+        })
+    });
+    return await response.json();
+}
+```
+
+## DEPENDENCIAS Y REQUISITOS
+
+### PrestaShop
+- Versión mínima: 1.7
+- Clases utilizadas: Module, Category, Context, Tools, Validate
+- Métodos de PrestaShop: getSubCategories(), getProducts(), getCategoryLink(), getProductLink()
+
+### PHP
+- Versión mínima: 7.1
+- Extensiones: JSON
+
+### Frontend
+- JavaScript habilitado
+- Fetch API o XMLHttpRequest
+
+## FLUJO DE DATOS
+
+1. **Instalación:** Se registra hook actionFrontControllerSetMedia
+2. **Carga de página:** Se inyecta variable JavaScript categoryproducts_ajax_url
+3. **Solicitud AJAX:** Frontend envía POST con parámetros
+4. **Procesamiento:** Controlador AJAX procesa según action
+5. **Respuesta:** JSON con datos estructurados o error
+
+## CASOS DE USO PRINCIPALES
+
+1. **Navegación dinámica:** Mostrar subcategorías sin recargar página
+2. **Listado de productos:** Cargar productos de categoría específica
+3. **Filtros dinámicos:** Búsqueda en tiempo real por descripciones
+4. **Mejora UX:** Reducir tiempos de carga y mejorar responsividad
+
+## CONSIDERACIONES DE SEGURIDAD
+
+- Validación de IDs de categoría
+- Sanitización de términos de búsqueda
+- Verificación de existencia de objetos antes de usar
+- Manejo de excepciones en todas las operaciones
+
+## OPTIMIZACIONES IMPLEMENTADAS
+
+- Límite de 100 productos por consulta
+- Ordenamiento eficiente por posición
+- Uso de Context para configuración actual
+- Generación de URLs SEO-friendly
+- Respuestas JSON compactas
+
+## INTEGRACIÓN CON TEMAS
+
+El módulo es agnóstico al tema. Para integrarlo:
+1. Incluir JavaScript que use categoryproducts_ajax_url
+2. Crear elementos DOM para mostrar resultados
+3. Manejar estados de carga y errores
+4. Aplicar estilos CSS según diseño del tema
+
+## VERSIONADO
+
+- v1.0.0: Implementación inicial
+- v1.1.0: Mejoras en manejo de errores y optimizaciones
+- v1.2.0: Generalización y renombrado de funcionalidades
+- v1.3.0: Añadida página de configuración, documentación SEO y verificación automática de robots.txt
+
+## DEBUGGING
+
+Para depurar problemas:
+1. Verificar que categoryproducts_ajax_url esté definida en JavaScript
+2. Comprobar logs de PrestaShop en /var/logs/
+3. Validar parámetros enviados en Network tab del navegador
+4. Verificar respuestas JSON en DevTools
+
+## EXTENSIBILIDAD
+
+Para añadir nueva funcionalidad:
+1. Crear nuevo case en switch del controlador AJAX
+2. Implementar método protected correspondiente
+3. Mantener estructura de respuesta consistente
+4. Actualizar documentación
+
+Este módulo está diseñado para ser simple, eficiente y fácil de integrar en cualquier implementación de PrestaShop que requiera navegación dinámica de categorías y productos.
+
+## CONFIGURACIÓN SEO
+
+### robots.txt
+Para evitar que los motores de búsqueda indexen las URLs del módulo AJAX, es recomendable añadir la siguiente línea al archivo robots.txt:
+
+```
+Disallow: /module/categoryproducts/
+```
+
+Esta configuración evita que Google y otros buscadores indexen las respuestas AJAX del módulo, manteniendo un SEO limpio.
+
+### Verificación Automática
+El módulo incluye una función de verificación automática que:
+- Comprueba si existe el archivo robots.txt en _PS_ROOT_DIR_
+- Busca la línea específica "Disallow: /module/categoryproducts/"
+- Muestra el estado con colores informativos en la página de configuración
+- Proporciona mensajes descriptivos sobre el estado actual
+
+### Estados de Verificación
+- **Configurado correctamente:** Archivo existe y contiene la línea requerida
+- **Configuración pendiente:** Archivo existe pero falta la línea
+- **Archivo no encontrado:** No existe robots.txt en la raíz del sitio
+
+### Consideraciones
+- Las URLs del módulo no están destinadas a ser indexadas
+- Las respuestas son JSON y no contenido visible para usuarios
+- La configuración no afecta el funcionamiento del módulo
+- Solo bloquea el acceso de robots de búsqueda 
