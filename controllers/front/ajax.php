@@ -42,11 +42,12 @@ class CategoryProductsAjaxModuleFrontController extends ModuleFrontController
             throw new Exception('Category not found');
         }
         
-        $subcategories = $category->getSubCategories($context->language->id);
+        $subcategories = $category->getSubCategories($context->language->id, false);
         $formattedSubcategories = array_map(function($subcat) use ($context) {
             return [
                 'id_category' => $subcat['id_category'],
                 'name' => $subcat['name'],
+                'active' => (bool)$subcat['active'],
                 'url' => $context->link->getCategoryLink(
                     $subcat['id_category'],
                     $subcat['link_rewrite']
@@ -67,17 +68,18 @@ class CategoryProductsAjaxModuleFrontController extends ModuleFrontController
             throw new Exception('Search term is required');
         }
         
-        $categories = Category::getCategories(false, true, false, '', 'position');
+        $categories = Category::getCategories($context->language->id, false, false, '', 'position');
         $matches = [];
         
         foreach ($categories as $category) {
             $cat = new Category($category['id_category']);
-            $description = $cat->description[$context->language->id];
+            $description = isset($cat->description[$context->language->id]) ? $cat->description[$context->language->id] : '';
             
             if (stripos($description, $searchTerm) !== false) {
                 $matches[] = [
                     'id' => $category['id_category'],
                     'name' => $category['name'],
+                    'active' => (bool)$category['active'],
                     'url' => $context->link->getCategoryLink(
                         $category['id_category'],
                         $category['link_rewrite']
@@ -110,13 +112,19 @@ class CategoryProductsAjaxModuleFrontController extends ModuleFrontController
             1,
             100,
             'position',
-            'ASC'
+            'ASC',
+            false,
+            true,
+            false,
+            1,
+            $context
         );
         
         $formattedProducts = array_map(function($product) use ($context) {
             return [
                 'id' => $product['id_product'],
                 'name' => $product['name'],
+                'active' => isset($product['active']) ? (bool)$product['active'] : true,
                 'url' => $context->link->getProductLink(
                     $product['id_product'],
                     $product['link_rewrite'],
@@ -128,7 +136,8 @@ class CategoryProductsAjaxModuleFrontController extends ModuleFrontController
         
         return [
             'success' => true,
-            'products' => $formattedProducts
+            'products' => $formattedProducts,
+            'category_active' => (bool)$category->active
         ];
     }
 } 

@@ -1,14 +1,15 @@
 # Category Products Module
 
 ## Descripción
-Módulo de PrestaShop para obtener productos y categorías mediante AJAX. Diseñado para facilitar la navegación dinámica y la carga de contenido sin recargar la página.
+Módulo de PrestaShop para obtener productos y categorías mediante AJAX. Diseñado para facilitar la navegación dinámica y la carga de contenido sin recargar la página. **Funciona con categorías activas e inactivas.**
 
 ## Características Principales
-- Obtención de subcategorías
-- Listado de productos por categoría
-- Búsqueda en descripciones de categorías
+- Obtención de subcategorías (incluye categorías inactivas)
+- Listado de productos por categoría (funciona con categorías inactivas)
+- Búsqueda en descripciones de categorías (todas las categorías)
 - URLs amigables para SEO
 - Compatibilidad con PrestaShop 1.7+
+- Verificación automática de configuración robots.txt
 
 ## Requisitos
 - PrestaShop 1.7 o superior
@@ -42,6 +43,7 @@ fetch(categoryproducts_ajax_url, {
         {
             "id_category": "456",
             "name": "Nombre de Subcategoría",
+            "active": true,
             "url": "url-amigable-subcategoria"
         }
     ]
@@ -64,9 +66,11 @@ fetch(categoryproducts_ajax_url, {
         {
             "id": "789",
             "name": "Nombre del Producto",
+            "active": true,
             "url": "url-amigable-producto"
         }
-    ]
+    ],
+    "category_active": true
 }
 ```
 
@@ -87,6 +91,7 @@ fetch(categoryproducts_ajax_url, {
         {
             "id": "456",
             "name": "Nombre de Categoría",
+            "active": false,
             "url": "url-amigable-categoria"
         }
     ],
@@ -125,8 +130,12 @@ categoryproducts/
 - Las URLs generadas son SEO-friendly
 - Límite de 100 productos por consulta
 - Los productos se ordenan por posición (ASC)
+- **Funciona con categorías inactivas:** Permite obtener subcategorías y productos de categorías desactivadas
+- **Campo `active`:** Todas las respuestas incluyen el estado activo/inactivo de categorías
+- **Solo productos activos:** Por seguridad, solo se devuelven productos activos
 - Búsqueda en descripciones de categorías con conteo de resultados
 - Manejo de errores mejorado con mensajes descriptivos
+- Verificación automática de configuración robots.txt
 
 ## Mantenimiento
 Para modificar el módulo, considerar:
@@ -142,6 +151,19 @@ Para reportar problemas o sugerir mejoras:
 3. Contactar con el equipo de desarrollo
 
 ## Changelog
+### v1.4.0
+- **Soporte para categorías inactivas:** El módulo ahora funciona con categorías desactivadas
+- Añadido campo `active` en respuestas de categorías y productos
+- Añadido campo `category_active` en respuesta de productos
+- Mejorado manejo de descripciones de categorías (protección contra valores null)
+- Actualizada documentación para reflejar el soporte de categorías inactivas
+
+### v1.3.0
+- Añadida página de configuración del módulo
+- Verificación automática de configuración robots.txt
+- Enlaces directos a documentación desde el panel de administración
+- Mejorada la experiencia de usuario del módulo
+
 ### v1.2.0
 - Eliminada la limpieza específica de nombres de productos
 - Renombrada la funcionalidad de búsqueda a 'search_description'

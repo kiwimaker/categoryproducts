@@ -9,7 +9,7 @@ class CategoryProducts extends Module
     {
         $this->name = 'categoryproducts';
         $this->tab = 'front_office_features';
-        $this->version = '1.3.0';
+        $this->version = '1.4.0';
         $this->author = 'Kiwimaker';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [

@@ -1,7 +1,7 @@
 # Category Products Module - Documentación para LLM
 
 ## RESUMEN EJECUTIVO
-Módulo de PrestaShop que proporciona una API AJAX para obtener dinámicamente información de categorías y productos sin recargar la página. Facilita la navegación fluida y mejora la experiencia del usuario.
+Módulo de PrestaShop que proporciona una API AJAX para obtener dinámicamente información de categorías y productos sin recargar la página. Facilita la navegación fluida y mejora la experiencia del usuario. **Funciona con categorías activas e inactivas.**
 
 ## ARQUITECTURA DEL MÓDULO
 
@@ -57,11 +57,14 @@ Variable JS: categoryproducts_ajax_url
         {
             "id_category": "456",
             "name": "Nombre de Subcategoría",
+            "active": true,
             "url": "URL completa SEO-friendly"
         }
     ]
 }
 ```
+
+**Nota:** Incluye subcategorías tanto activas como inactivas. El campo `active` indica el estado.
 
 ### 2. OBTENER PRODUCTOS DE CATEGORÍA
 **Acción:** Por defecto (sin especificar action)
@@ -76,15 +79,19 @@ Variable JS: categoryproducts_ajax_url
         {
             "id": "789",
             "name": "Nombre del Producto",
+            "active": true,
             "url": "URL completa SEO-friendly del producto"
         }
-    ]
+    ],
+    "category_active": true
 }
 ```
 
 **Límites:**
 - Máximo 100 productos por consulta
 - Ordenamiento: Por posición (ASC)
+- **Funciona con categorías inactivas**
+- Solo devuelve productos activos (por seguridad)
 
 ### 3. BÚSQUEDA EN DESCRIPCIONES
 **Acción:** search_description
@@ -100,12 +107,15 @@ Variable JS: categoryproducts_ajax_url
         {
             "id": "456",
             "name": "Nombre de Categoría",
+            "active": false,
             "url": "URL completa SEO-friendly"
         }
     ],
     "total_found": 1
 }
 ```
+
+**Nota:** Busca en categorías activas e inactivas. El campo `active` indica el estado.
 
 ## MANEJO DE ERRORES
 
@@ -221,6 +231,7 @@ El módulo es agnóstico al tema. Para integrarlo:
 - v1.1.0: Mejoras en manejo de errores y optimizaciones
 - v1.2.0: Generalización y renombrado de funcionalidades
 - v1.3.0: Añadida página de configuración, documentación SEO y verificación automática de robots.txt
+- v1.4.0: Soporte para categorías inactivas y campos de estado en respuestas JSON
 
 ## DEBUGGING
 
@@ -268,3 +279,30 @@ El módulo incluye una función de verificación automática que:
 - Las respuestas son JSON y no contenido visible para usuarios
 - La configuración no afecta el funcionamiento del módulo
 - Solo bloquea el acceso de robots de búsqueda 
+
+## FUNCIONALIDADES AVANZADAS
+
+### Soporte para Categorías Inactivas
+El módulo está diseñado para funcionar con categorías inactivas, proporcionando:
+
+#### Obtención de Subcategorías
+- **Incluye categorías inactivas** en los resultados
+- Campo `active` en la respuesta para identificar el estado
+- Permite navegación completa del catálogo
+
+#### Búsqueda en Descripciones  
+- **Busca en todas las categorías** independientemente de su estado
+- Útil para encontrar contenido en categorías temporalmente desactivadas
+- Campo `active` para filtrar en frontend si es necesario
+
+#### Obtención de Productos
+- **Funciona con categorías inactivas** como fuente
+- Solo devuelve **productos activos** (por seguridad y experiencia de usuario)
+- Campo `category_active` indica si la categoría padre está activa
+- Campo `active` en cada producto (siempre true ya que solo se devuelven activos)
+
+### Casos de Uso para Categorías Inactivas
+1. **Gestión de contenido estacional:** Acceder a productos de categorías temporalmente desactivadas
+2. **Migración de datos:** Trabajar con categorías en proceso de reactivación
+3. **Administración avanzada:** Permitir acceso administrativo a todo el catálogo
+4. **Desarrollo y testing:** Probar funcionalidades sin afectar el frontend público 
